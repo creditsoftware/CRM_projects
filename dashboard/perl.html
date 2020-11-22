@@ -1,0 +1,51 @@
+sub _get_kegg_info {
+
+    my ($dbproc, $sqlite_db) = @_;
+    
+    my $query = "select LinkID, count(*) as count from UniprotIndex where AttributeType = 'K' group by LinkId order by count desc limit 1000;";
+    
+    my @vals;
+    my $counter = 0;
+    my $NUM_TOP_DOMAINS = 50;
+    my @results = &do_sql_2D($dbproc, $query);
+    print(("THIS IS TEST!!!"));
+    foreach my $result (@results) {
+    my ($kegg, $count) = @$result;
+    
+    print(($kegg));
+    print(("\n"));
+    my ($kegg, $count) = split(/\t/);
+    <!-- push (@vals, [$kegg, $count]); -->
+    @vals[$kegg] = $count;
+    if ($counter >= $NUM_TOP_DOMAINS) { last;
+    }
+    
+    
+    
+    }
+    my $barplot = new CanvasXpress::Barplot("barplot");
+    my $plot_loader2 = new CanvasXpress::PlotOnLoader("kegg_$$");
+    $plot_loader2->add_plot($barplot);
+    
+    my %inputs2 = ( orientation => 'horizontal',
+    
+    title => 'Top KEGG domains',
+    
+    var_name => 'kegg',
+    
+    data => [@vals],
+    );
+    
+    
+    
+    my $kegg_html = $barplot->draw(%inputs2);
+    
+    $kegg_html .= $plot_loader2->write_plot_loader();
+    
+    my $cgi2 = new CGI();
+    
+    print $cgi2->start_html(-onLoad => "kegg_$$();");
+    
+    return($kegg_html);
+    
+    }
